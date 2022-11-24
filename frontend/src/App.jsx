@@ -1,13 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [posts, setPosts] = useState([{
-    content: 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste quia cum architecto autem porro modi consequuntur provident, quidem adipisci nobis eius deserunt aspernatur inventore!'
-  }],
-    [{
-      content: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia'
-    }]);
+  const [posts, setPosts] = useState();
+  const [newPost, setNewPost] = useState();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/posts')
+      .then(res => res.json())
+      .then(data => setPosts(data.data));
+  }, [loading])
+  console.log("kcvbn")
+
+  const handlePost = async (event) => {
+    /**
+     * Gather all the form data to state variable carFormData
+     * When the form is submitted POST the data to Backend using fetch post
+     * https://googlechrome.github.io/samples/fetch-api/fetch-post.html
+     */
+
+    await fetch('http://localhost:3001/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newPost),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    setNewPost('');
+    setLoading(!loading);
+  }
+
+  const handlePostChange = event => {
+    setNewPost({ content: event.target.value });
+  };
+
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:3001/posts/${id}`, {
+      method: 'DELETE',
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    setLoading(!loading);
+  }
+
   return (
     <div className='react-app-component text-center'>
       <div className="container">
@@ -17,21 +65,25 @@ function App() {
               <div className="card-body">
                 <div className="mb-3">
                   <label className="form-label">Enter your post</label>
-                  <textarea className="form-control" id="post-content" rows="3"></textarea>
+                  <textarea className="form-control" id="post-content" rows="3" onChange={handlePostChange}></textarea>
                   <div className="d-grid gap-2">
-                    <button type="button" className="btn btn-primary mt-2">Post</button>
+                    <button type="button" className="btn btn-primary mt-2" onClick={handlePost}>Post</button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="card text-white bg-dark my-3 text-start">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">Oct 4, 2022 - 6:15 PM</h6>
-                <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                <a href="#" className="card-link">Delete</a>
-              </div>
-            </div>
+            {posts && posts.map(post => {
+              return (
+                <div className="card text-white bg-dark my-3 text-start" key={post._id}>
+                  <div className="card-body">
+                    <h6 className="card-subtitle mb-2 text-muted">{post.createdAt.slice(0,10)} {post.createdAt.slice(11,16)}</h6>
+                    <p className="card-text">{post.content}</p>
+                    <button href="#" className="card-link" onClick={() => handleDelete(post._id)}>Delete</button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
