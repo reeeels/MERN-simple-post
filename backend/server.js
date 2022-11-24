@@ -17,7 +17,7 @@ const options = {
 
 // mongodb+srv://frontend:frontend@cluster0.6vk0qgz.mongodb.net/?retryWrites=true&w=majority
 // You guys need to replace with your own server url and correct <username> and <password>
-const dbUrl = `mongodb+srv://frontend:frontend@cluster0.y1tmm.mongodb.net/test`;
+const dbUrl = ``;
 
 // Mongo DB connection
 mongoose.connect(dbUrl, options, (err) => {
